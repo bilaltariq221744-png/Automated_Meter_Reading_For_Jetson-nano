@@ -1,0 +1,36 @@
+# ============================================================
+#        ELECTRICITY METER READING PIPELINE
+#              Requirements File
+#        Install Command: pip install -r requirements.txt
+# ============================================================
+
+# ---- Core YOLOv8 (includes PyTorch CPU automatically) -----
+ultralytics
+
+# ---- Computer Vision -----------------------------------
+opencv-python
+opencv-contrib-python
+
+# ---- Image Processing ----------------------------------
+numpy
+Pillow
+scikit-image
+
+# ---- Video Processing ----------------------------------
+imageio
+imageio-ffmpeg
+
+# ---- Data & Visualization ------------------------------
+matplotlib
+pandas
+seaborn
+
+# ---- Progress & Utilities ------------------------------
+tqdm
+PyYAML
+
+# ============================================================
+# NOTE: TensorRT is NOT installed here
+# TensorRT will be installed directly on Jetson Nano later
+# during the deployment phase
+# ============================================================
