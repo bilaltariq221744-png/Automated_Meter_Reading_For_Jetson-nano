@@ -1,70 +1,35 @@
-# ============================================================
-#        ELECTRICITY METER - LCD DISPLAY DETECTION
-#              Video Testing Script
-# ============================================================
-
 import cv2
 import time
 from pathlib import Path
 from ultralytics import YOLO
 
-# ============================================================
-#                  CONFIGURATION
-#        Only change things in this section
-# ============================================================
-
-# Path to your video file
-VIDEO_PATH  = r"C:/Users/PMLS/Desktop/Meter_project/WhatsApp Video 2025-08-14 at 2.56.45 AM.mp4"   # ← CHANGE THIS to your video path
-
-# Path to your trained model
+VIDEO_PATH  = r"C:/Users/PMLS/Desktop/Meter_project/WhatsApp Video 2025-08-14 at 2.56.45 AM.mp4"   
 MODEL_PATH  = r"C:/Users/PMLS/Desktop/Automated_Meter_Reading_For_Jetson-nano/LCD_Detection_model/weights/best.pt"
-                                  # ← CHANGE THIS if your path is different
 
 # Detection Settings
-CONF_THRESHOLD = 0.5             # Confidence threshold (0.0 - 1.0)
-                                  # Only show detections above this confidence
+CONF_THRESHOLD = 0.5             
+SAVE_OUTPUT    = True           
+OUTPUT_PATH    = r"C:/Users/PMLS/Desktop/Automated_Meter_Reading_For_Jetson-nano/output_detected.mp4"  
+SHOW_WINDOW    = True
 
-# Output Settings
-SAVE_OUTPUT    = True            # Save output video with detections drawn
-# Output will be written to the project folder
-OUTPUT_PATH    = r"C:/Users/PMLS/Desktop/Automated_Meter_Reading_For_Jetson-nano/output_detected.mp4"  # Output video file name
+PROCESS_EVERY_NTH_FRAME = 1 
 
-SHOW_WINDOW    = True            # Show live detection window while processing
-                                  # Set False if you just want to save without showing
-
-# Processing Settings
-PROCESS_EVERY_NTH_FRAME = 1     # Process every Nth frame
-                                  # 1 = every frame (slower but smoother)
-                                  # 3 = every 3rd frame (faster)
-
-# ============================================================
-#                  DISPLAY SETTINGS
-# ============================================================
-
-# Box color (BGR format)
-BOX_COLOR       = (0, 255, 0)    # Green box around LCD
-TEXT_COLOR      = (0, 255, 0)    # Green text
-CONF_BAR_COLOR  = (0, 200, 255)  # Orange confidence bar
-
-# ============================================================
-#                  MAIN TESTING FUNCTION
-# ============================================================
+BOX_COLOR       = (0, 255, 0)    
+TEXT_COLOR      = (0, 255, 0)    
+CONF_BAR_COLOR  = (0, 200, 255)  
 
 def test_video():
 
-    # ── Check model exists ──────────────────────────────────
     if not Path(MODEL_PATH).exists():
         print(f"\n[ERROR] Model not found at: {MODEL_PATH}")
         print("Please update MODEL_PATH in the script.")
         return
 
-    # ── Check video exists ──────────────────────────────────
     if not Path(VIDEO_PATH).exists():
         print(f"\n[ERROR] Video not found at: {VIDEO_PATH}")
         print("Please update VIDEO_PATH in the script.")
         return
 
-    # ── Load model ──────────────────────────────────────────
     print("\n" + "="*60)
     print("      LCD DISPLAY DETECTOR — VIDEO TEST")
     print("="*60)
@@ -72,13 +37,11 @@ def test_video():
     model = YOLO(MODEL_PATH)
     print(f"[OK]   Model loaded successfully!")
 
-    # ── Open video ──────────────────────────────────────────
     cap = cv2.VideoCapture(VIDEO_PATH)
     if not cap.isOpened():
         print(f"[ERROR] Cannot open video: {VIDEO_PATH}")
         return
 
-    # ── Get video properties ────────────────────────────────
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     fps          = cap.get(cv2.CAP_PROP_FPS)
     width        = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -98,7 +61,6 @@ def test_video():
     print(f"  Show Window  : {SHOW_WINDOW}")
     print("="*60)
 
-    # ── Setup video writer ──────────────────────────────────
     writer = None
     if SAVE_OUTPUT:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -113,7 +75,6 @@ def test_video():
 
     print(f"\n[INFO] Processing video...\n")
 
-    # ── Stats tracking ──────────────────────────────────────
     frame_count      = 0
     processed_count  = 0
     detection_count  = 0
@@ -122,7 +83,6 @@ def test_video():
     paused           = False
     screenshot_count = 0
 
-    # ── Process video frame by frame ────────────────────────
     while True:
 
         # Handle pause
@@ -143,19 +103,15 @@ def test_video():
 
         frame_count += 1
 
-        # ── Process every Nth frame ─────────────────────────
         if frame_count % PROCESS_EVERY_NTH_FRAME != 0:
-            # Still write unprocessed frames to output
             if writer:
                 writer.write(frame)
             continue
 
         processed_count += 1
 
-        # ── Run detection ───────────────────────────────────
         results = model(frame, conf=CONF_THRESHOLD, verbose=False)
 
-        # ── Draw detections on frame ────────────────────────
         annotated_frame = frame.copy()
         detections_in_frame = 0
 
@@ -165,7 +121,6 @@ def test_video():
                 continue
 
             for box in boxes:
-                # Get coordinates
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 conf = float(box.conf[0])
                 cls  = int(box.cls[0])
@@ -174,10 +129,8 @@ def test_video():
                 detection_count     += 1
                 total_conf          += conf
 
-                # ── Draw bounding box ───────────────────────
                 cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), BOX_COLOR, 2)
 
-                # ── Draw label background ───────────────────
                 label       = f"LCD {conf:.2f}"
                 label_size  = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)[0]
                 label_bg_x2 = x1 + label_size[0] + 10
@@ -189,13 +142,11 @@ def test_video():
                               (label_bg_x2, label_bg_y2),
                               BOX_COLOR, -1)
 
-                # ── Draw label text ─────────────────────────
                 cv2.putText(annotated_frame, label,
                             (x1 + 5, y1 - 8),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             0.6, (0, 0, 0), 2)
 
-                # ── Draw confidence bar ─────────────────────
                 bar_width  = x2 - x1
                 bar_filled = int(bar_width * conf)
                 cv2.rectangle(annotated_frame,
@@ -207,12 +158,10 @@ def test_video():
                               (x1 + bar_filled, y2 + 8),
                               CONF_BAR_COLOR, -1)
 
-        # ── Draw stats overlay ──────────────────────────────
         elapsed      = time.time() - start_time
         current_fps  = processed_count / elapsed if elapsed > 0 else 0
         progress_pct = (frame_count / total_frames) * 100
 
-        # Background for stats
         cv2.rectangle(annotated_frame, (0, 0), (320, 130), (0, 0, 0), -1)
         cv2.rectangle(annotated_frame, (0, 0), (320, 130), (0, 255, 0), 1)
 
@@ -230,11 +179,9 @@ def test_video():
         cv2.putText(annotated_frame, f"Conf   : {CONF_THRESHOLD}  |  Press Q to quit",
                     (10, 125), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 150), 1)
 
-        # ── Save frame to output video ──────────────────────
         if writer:
             writer.write(annotated_frame)
 
-        # ── Show window ─────────────────────────────────────
         if SHOW_WINDOW:
             cv2.imshow("LCD Meter Detector", annotated_frame)
             key = cv2.waitKey(1) & 0xFF
@@ -251,20 +198,17 @@ def test_video():
                 paused = True
                 print("[INFO] Paused. Press P to resume.")
 
-        # ── Print progress every 100 frames ─────────────────
         if processed_count % 100 == 0:
             print(f"  Progress: {progress_pct:.1f}% | "
                   f"Frame {frame_count}/{total_frames} | "
                   f"FPS: {current_fps:.1f} | "
                   f"Detections: {detection_count}")
 
-    # ── Cleanup ─────────────────────────────────────────────
     cap.release()
     if writer:
         writer.release()
     cv2.destroyAllWindows()
 
-    # ── Final Stats ─────────────────────────────────────────
     total_time  = time.time() - start_time
     avg_conf    = total_conf / detection_count if detection_count > 0 else 0
     avg_fps     = processed_count / total_time if total_time > 0 else 0
@@ -284,7 +228,6 @@ def test_video():
         print(f"  Screenshots      : {screenshot_count} saved")
     print("="*60)
 
-    # ── Verdict ─────────────────────────────────────────────
     print("\n[VERDICT]")
     if avg_conf >= 0.85:
         print(f"  Model is performing EXCELLENTLY on your video!")
@@ -298,10 +241,6 @@ def test_video():
         print(f"  Model confidence is LOW at {avg_conf*100:.1f}%.")
         print(f"  Consider collecting more training data.")
 
-
-# ============================================================
-#                       MAIN
-# ============================================================
 
 if __name__ == "__main__":
     test_video()

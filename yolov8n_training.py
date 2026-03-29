@@ -1,21 +1,13 @@
-# ============================================================
-#        ELECTRICITY METER - LCD DISPLAY DETECTION
-#              YOLOv8n Training Script
-# ============================================================
-
 import os
 import time
 import yaml
 from pathlib import Path
 from ultralytics import YOLO
 
-# ============================================================
-#                  CONFIGURATION
-#        Only change things in this section
-# ============================================================
+
 
 # Path to your data.yaml file
-DATA_YAML = "C:/Users/PMLS/Desktop/Indonesia/LCD_Screen_Detection.v3-main.yolov8/data.yaml"   # Change this to your full path 
+DATA_YAML = "C:/Users/PMLS/Desktop/Indonesia/LCD_Screen_Detection.v3-main.yolov8/data.yaml"  
 
 # Training Parameters
 EPOCHS      = 100     # Number of training epochs
@@ -29,9 +21,6 @@ LR          = 0.01   # Initial learning rate
 PROJECT_NAME = "meter_lcd_detection"   # Folder where results will be saved
 RUN_NAME     = "yolov8n_run1"          # Name of this training run
 
-# ============================================================
-#                  VERIFY PATHS
-# ============================================================
 
 def verify_setup():
     print("=" * 60)
@@ -84,19 +73,12 @@ def verify_setup():
     return True
 
 
-# ============================================================
-#                  TRAINING
-# ============================================================
-
 def train():
 
-    # Verify setup first
     if not verify_setup():
         return
 
     print("\n[INFO] Loading YOLOv8n model...")
-    # Load YOLOv8n pretrained model
-    # This will auto-download yolov8n.pt (~6MB) on first run
     model = YOLO('yolov8n.pt')
 
     print("[INFO] Starting training...\n")
@@ -117,7 +99,6 @@ def train():
 
     start_time = time.time()
 
-    # ---- TRAIN ----
     results = model.train(
         data      = DATA_YAML,
         epochs    = EPOCHS,
@@ -159,10 +140,6 @@ def train():
     end_time = time.time()
     total_time = (end_time - start_time) / 3600
 
-    # ============================================================
-    #                  TRAINING COMPLETE
-    # ============================================================
-
     print("\n" + "=" * 60)
     print("            TRAINING COMPLETE!")
     print("=" * 60)
@@ -170,7 +147,6 @@ def train():
     print(f"  Results saved to    : {PROJECT_NAME}/{RUN_NAME}/")
     print("=" * 60)
 
-    # ---- VALIDATE on validation set ----
     print("\n[INFO] Running validation on validation set...")
     val_results = model.val()
     print(f"\n[VALIDATION RESULTS]")
@@ -179,9 +155,7 @@ def train():
     print(f"  Precision   : {val_results.box.mp:.4f}")
     print(f"  Recall      : {val_results.box.mr:.4f}")
 
-    # ---- TEST on test images ----
     print("\n[INFO] Running prediction on test images...")
-    # ensure output directory exists (YOLO predict will create it if exist_ok=True)
     os.makedirs(f"{PROJECT_NAME}/test_predictions", exist_ok=True)
     test_results = model.predict(
         source   = 'test/images',
@@ -189,10 +163,9 @@ def train():
         conf     = 0.5,
         project  = PROJECT_NAME,
         name     = 'test_predictions',
-        exist_ok = True           # allow overwriting or existing folder
+        exist_ok = True           
     )
 
-    # ---- EXPORT best model ----
     print("\n[INFO] Exporting best model...")
     best_model_path = f"{PROJECT_NAME}/{RUN_NAME}/weights/best.pt"
 
@@ -214,10 +187,6 @@ def train():
     print(f"  4. We will then move to Step 2: Perspective Correction")
     print("=" * 60)
 
-
-# ============================================================
-#                       MAIN
-# ============================================================
 
 if __name__ == "__main__":
     train()

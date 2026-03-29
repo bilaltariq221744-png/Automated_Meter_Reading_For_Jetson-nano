@@ -2,28 +2,17 @@ import os
 import cv2
 from ultralytics import YOLO
 
-# =========================
-# USER INPUT PATHS
-# =========================
+
 MODEL_PATH = r"C:/Users/PMLS/Desktop/Meter_reading_indonesia/Number_detection_model/weights/best.pt"
 IMAGE_FOLDER = r"C:/Users/PMLS/Desktop/Meter_reading_indonesia/cropped_screens"
 OUTPUT_FOLDER = r"C:/Users/PMLS/Desktop/Meter_reading_indonesia/test_results"
 
 IMG_SIZE = 320
 
-# =========================
-# CREATE OUTPUT FOLDER
-# =========================
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# =========================
-# LOAD MODEL
-# =========================
 model = YOLO(MODEL_PATH)
 
-# =========================
-# PROCESS IMAGES
-# =========================
 for img_name in os.listdir(IMAGE_FOLDER):
 
     img_path = os.path.join(IMAGE_FOLDER, img_name)
@@ -50,4 +39,4 @@ for img_name in os.listdir(IMAGE_FOLDER):
 
     print(f"Processed: {img_name}")
 
-print("✅ All images processed and saved.")
+print(" All images processed and saved.")

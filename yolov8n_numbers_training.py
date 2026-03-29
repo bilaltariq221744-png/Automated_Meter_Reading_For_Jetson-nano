@@ -1,10 +1,8 @@
-# yolov8_train_aug.py
 from ultralytics import YOLO
 
-# 1️⃣ Load pre-trained YOLOv8n model
 model = YOLO("yolov8n.pt")  # Nano model pre-trained on COCO
 
-# 2️⃣ Train the model with augmentation and advanced settings
+# 2️ Train the model with augmentation and advanced settings
 model.train(
     data="C:\\Users\\PMLS\\Desktop\\Meter_reading_indonesia\\dataset_numbers\\data.yaml",  # dataset YAML
     epochs=100,          # total epochs
@@ -39,6 +37,3 @@ model.train(
     save_period=10,
     verbose=True
 )
-
-# ✅ After training, best weights are in:
-# runs/train/meter_digits_aug/weights/best.pt
